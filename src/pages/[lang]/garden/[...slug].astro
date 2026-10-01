@@ -1,4 +1,5 @@
 ---
+import Botanical from '@/components/Botanical.astro';
 import { getCollection, render } from 'astro:content';
 import Base from '@/layouts/Base.astro';
 import VideoEmbed from '@/components/VideoEmbed.astro';
@@ -26,7 +27,16 @@ const toc = headings.filter((h) => h.depth === 2);
 <Base title={d.title} description={d.description} type="article">
   <article class="wrap entry">
     <header class="head">
-      <a class="arrow-link back" href={path(lang, 'garden')}>← {t('garden.back')}</a>
+      <div class="entry-plate" aria-hidden="true">
+        <Botanical
+          species={({ 'system-design': 'branch', devlog: 'fern', 'post-mortem': 'dandelion', note: 'sprout', talk: 'flower' } as const)[d.kind]}
+          seed={entry.id}
+          plate
+          fig={d.date.getUTCMonth() + 1}
+          meta={t(`garden.stage.${d.stage}`)}
+        />
+      </div>
+      <a class="arrow-link arrow-link--back back" href={path(lang, 'garden')}>{t('garden.back')}</a>
       <div class="meta label">
         <span class="accent">{d.kind}</span>
         <span>·</span>
@@ -81,17 +91,30 @@ const toc = headings.filter((h) => h.depth === 2);
   }
 
   .head {
+    position: relative;
     padding-block: clamp(40px, 7vw, 88px) 32px;
-    max-width: 920px;
+    padding-right: 260px;
+  }
+
+  .entry-plate {
+    position: absolute;
+    right: 0;
+    bottom: 24px;
+    width: 220px;
+  }
+
+  @media (max-width: 900px) {
+    .head {
+      padding-right: 0;
+    }
+    .entry-plate {
+      display: none;
+    }
   }
 
   .back {
     display: inline-block;
     margin-bottom: 28px;
-  }
-
-  .back::after {
-    content: '' !important;
   }
 
   .meta {

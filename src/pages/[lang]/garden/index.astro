@@ -1,4 +1,6 @@
 ---
+import Botanical from '@/components/Botanical.astro';
+import Icon from '@/components/Icon.astro';
 import Base from '@/layouts/Base.astro';
 import GardenRow from '@/components/GardenRow.astro';
 import type { Lang } from '@/i18n/ui';
@@ -15,13 +17,18 @@ const stages = ['seedling', 'budding', 'evergreen'] as const;
 ---
 
 <Base title={t('garden.title')} description={t('garden.lede')}>
-  <header class="page-head wrap">
+  <header class="page-head wrap head">
+    <div class="plates" aria-hidden="true">
+      <Botanical species="sprout" seed="g-seedling" plate fig={1} meta={t('garden.stage.seedling')} collage={false} />
+      <Botanical species="branch" seed="g-budding" plate fig={2} meta={t('garden.stage.budding')} />
+      <Botanical species="flower" seed="g-evergreen" plate fig={3} meta={t('garden.stage.evergreen')} />
+    </div>
     <span class="label accent">02 — {lang === 'es' ? 'notas · videos · diseño de sistemas' : 'notes · videos · system design'}</span>
     <h1>{t('garden.title')}</h1>
     <p class="lede">{t('garden.lede')}</p>
     <div class="legend">
       {stages.map((s) => <span class:list={['stage', s]}>{t(`garden.stage.${s}`)}</span>)}
-      <a class="label rss" href={`/${lang}/garden/rss.xml`}>{t('garden.rss')} ↗</a>
+      <a class="label rss" href={`/${lang}/garden/rss.xml`}>{t('garden.rss')} <Icon name="up-right" /></a>
     </div>
   </header>
 
@@ -42,6 +49,37 @@ const stages = ['seedling', 'budding', 'evergreen'] as const;
 </Base>
 
 <style>
+  .head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+    column-gap: 48px;
+  }
+
+  .head > :not(.plates) {
+    grid-column: 1;
+  }
+
+  .plates {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    align-self: end;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  @media (max-width: 860px) {
+    .head {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .plates {
+      grid-column: 1;
+      grid-row: auto;
+      order: 10;
+      margin-top: 32px;
+    }
+  }
+
   .legend {
     display: flex;
     flex-wrap: wrap;

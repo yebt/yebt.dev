@@ -1,0 +1,28 @@
+---
+/** Renders "30→5" style values with a drawn arrow instead of the glyph. */
+import Icon from './Icon.astro';
+
+interface Props {
+  value: string;
+}
+const parts = Astro.props.value.split('→');
+---
+
+{
+  parts.map((part, i) => (
+    <>
+      {i > 0 && <Icon name="right" class="value-arrow" />}
+      {part}
+    </>
+  ))
+}
+
+<style>
+  :global(.value-arrow) {
+    width: 0.62em;
+    height: 0.62em;
+    margin-inline: 0.12em;
+    vertical-align: 0.06em;
+    color: var(--accent);
+  }
+</style>

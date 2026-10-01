@@ -58,17 +58,45 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
           if (saved === 'light' || saved === 'dark') theme = saved;
           else if (window.matchMedia('(prefers-color-scheme: light)').matches) theme = 'light';
         } catch (e) {}
-        document.documentElement.dataset.theme = theme;
+        var root = document.documentElement;
+        root.dataset.theme = theme;
+        root.classList.add('js');
+        try {
+          if (!sessionStorage.getItem('booted')) {
+            root.classList.add('boot');
+            sessionStorage.setItem('booted', '1');
+          }
+        } catch (e) {}
       })();
     </script>
     <slot name="head" />
   </head>
   <body>
     <a class="skip" href="#main">{t('nav.skip')}</a>
+    <div class="boot-scan" aria-hidden="true"></div>
     <Header />
     <main id="main">
       <slot />
     </main>
     <Footer />
+    <script>
+      // Power things on as they enter the viewport: [data-boot] blocks and herbarium specimens.
+      const targets = document.querySelectorAll('[data-boot], .botanical');
+      const on = (el: Element) => el.classList.add('is-on');
+      if (!('IntersectionObserver' in window)) targets.forEach(on);
+      else {
+        const io = new IntersectionObserver(
+          (entries) =>
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                on(e.target);
+                io.unobserve(e.target);
+              }
+            }),
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+        );
+        targets.forEach((el) => io.observe(el));
+      }
+    </script>
   </body>
 </html>

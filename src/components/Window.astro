@@ -4,11 +4,13 @@ interface Props {
   title: string;
   class?: string;
   as?: 'div' | 'section' | 'aside';
+  /** Power on like a CRT when scrolled into view */
+  boot?: boolean;
 }
-const { title, class: className, as: Tag = 'div' } = Astro.props;
+const { title, class: className, as: Tag = 'div', boot = false } = Astro.props;
 ---
 
-<Tag class:list={['window', className]}>
+<Tag class:list={['window', className]} data-boot={boot ? 'crt' : undefined}>
   <div class="window-bar">
     <span class="window-tab">{title}</span>
     <span class="window-ctrl" aria-hidden="true">▼ ✕</span>

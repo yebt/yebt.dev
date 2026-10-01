@@ -18,7 +18,7 @@ const hl = (src: string) =>
 ---
 
 <pre class="code" aria-label="code"><code>{lines.map((line, i) => (
-  <span class="line"><span class="ln" aria-hidden="true">{i + start}</span><span set:html={hl(line) || ' '} /></span>
+  <span class="line" style={`--i:${i}`}><span class="ln" aria-hidden="true">{i + start}</span><span set:html={hl(line) || ' '} />{i === lines.length - 1 && <span class="cursor" aria-hidden="true" />}</span>
 ))}</code></pre>
 
 <style>
@@ -48,6 +48,38 @@ const hl = (src: string) =>
     user-select: none;
     border-right: 1px solid var(--line);
     margin-right: 1em;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.05em;
+    margin-left: 0.3em;
+    vertical-align: -0.18em;
+    background: var(--accent);
+    animation: caret 1.1s steps(2) infinite;
+  }
+
+  @keyframes caret {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* lines are "printed" one by one once the parent window powers on */
+  :global(html.js [data-boot]) .line {
+    opacity: 0;
+  }
+
+  :global(html.js [data-boot].is-on) .line {
+    animation: line-on 0.01s linear forwards;
+    animation-delay: calc(0.45s + var(--i) * 0.09s);
+  }
+
+  @keyframes line-on {
+    to {
+      opacity: 1;
+    }
   }
 
   .code :global(.s) {

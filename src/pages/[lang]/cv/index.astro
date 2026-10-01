@@ -1,4 +1,5 @@
 ---
+import Icon from '@/components/Icon.astro';
 import Base from '@/layouts/Base.astro';
 import CvDocument from '@/components/CvDocument.astro';
 import { site } from '@/data/site';
@@ -18,9 +19,9 @@ const other = otherLang(lang);
     <h1>{t('nav.cv')}</h1>
     <p class="lede">{t('cv.lede')}</p>
     <div class="ctas">
-      <a class="btn btn--accent" href={site.cv[lang]} download>↓ {t('cv.download')} ({lang.toUpperCase()})</a>
-      <a class="btn" href={site.cv[other]} download>↓ PDF ({other.toUpperCase()})</a>
-      <a class="btn" href={path(other, 'cv')} hreflang={other}>{t('cv.other')} →</a>
+      <a class="btn btn--accent" href={site.cv[lang]} download><Icon name="down" /> {t('cv.download')} ({lang.toUpperCase()})</a>
+      <a class="btn" href={site.cv[other]} download><Icon name="down" /> PDF ({other.toUpperCase()})</a>
+      <a class="btn" href={path(other, 'cv')} hreflang={other}>{t('cv.other')} <Icon name="right" /></a>
     </div>
   </header>
 

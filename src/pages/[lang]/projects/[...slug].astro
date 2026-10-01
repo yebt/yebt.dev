@@ -1,4 +1,7 @@
 ---
+import Botanical from '@/components/Botanical.astro';
+import Icon from '@/components/Icon.astro';
+import Value from '@/components/Value.astro';
 import { getCollection, render } from 'astro:content';
 import Base from '@/layouts/Base.astro';
 import GardenRow from '@/components/GardenRow.astro';
@@ -33,7 +36,8 @@ const statusLabel: Record<typeof d.status, string> =
 <Base title={d.title} description={d.summary} type="article">
   <article>
     <header class="page-head wrap head">
-      <a class="arrow-link back" href={path(lang, 'projects')}>← {t('projects.back')}</a>
+      <div class="specimen-bg head-spec"><Botanical species={(['branch', 'fern', 'flower', 'dandelion'] as const)[d.order % 4]} seed={entry.id} /></div>
+      <a class="arrow-link arrow-link--back back" href={path(lang, 'projects')}>{t('projects.back')}</a>
       <h1>{d.title}</h1>
       <p class="lede">{d.summary}</p>
 
@@ -52,7 +56,7 @@ const statusLabel: Record<typeof d.status, string> =
           <ul class="outcomes" aria-label={t('projects.outcomes')}>
             {d.outcomes.map((o) => (
               <li>
-                <span class="v wide">{o.value}</span>
+                <span class="v wide"><Value value={o.value} /></span>
                 <span class="label">{o.label}</span>
               </li>
             ))}
@@ -62,8 +66,8 @@ const statusLabel: Record<typeof d.status, string> =
 
       <div class="links">
         {d.private && <span class="tag notice">● {t('projects.private')}</span>}
-        {!d.private && d.repo && <a class="btn" href={d.repo} rel="noopener">{t('projects.repo')} →</a>}
-        {!d.private && d.live && <a class="btn btn--accent" href={d.live} rel="noopener">{t('projects.live')} →</a>}
+        {!d.private && d.repo && <a class="btn" href={d.repo} rel="noopener">{t('projects.repo')} <Icon name="up-right" /></a>}
+        {!d.private && d.live && <a class="btn btn--accent" href={d.live} rel="noopener">{t('projects.live')} <Icon name="up-right" /></a>}
       </div>
     </header>
 
@@ -89,13 +93,15 @@ const statusLabel: Record<typeof d.status, string> =
     font-size: clamp(2.4rem, 7.5vw, 5.5rem);
   }
 
+  .head-spec {
+    right: var(--gutter);
+    top: 24px;
+    width: clamp(150px, 20vw, 240px);
+  }
+
   .back {
     display: inline-block;
     margin-bottom: 28px;
-  }
-
-  .back::after {
-    content: '' !important;
   }
 
   .facts {

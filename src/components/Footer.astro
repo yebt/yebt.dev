@@ -1,4 +1,6 @@
 ---
+import Botanical from './Botanical.astro';
+import Icon from './Icon.astro';
 import { site } from '@/data/site';
 import { getLangFromUrl, path, useTranslations } from '@/i18n/utils';
 
@@ -16,6 +18,13 @@ const links = [
 
 <footer class="footer">
   <div class="wrap">
+    <div class="meadow" aria-hidden="true">
+      {['flower', 'grass', 'dandelion', 'grass', 'fern', 'grass', 'branch'].map((sp, i) => (
+        <div class="meadow-plant" style={`--h:${[78, 52, 92, 60, 84, 46, 70][i]}%`}>
+          <Botanical species={sp as 'grass'} seed={`meadow-${i}`} collage={false} ground={false} />
+        </div>
+      ))}
+    </div>
     <p class="giant wide" aria-hidden="true">yebt<span class="accent">.</span>dev</p>
     <div class="row">
       <div class="col">
@@ -28,7 +37,7 @@ const links = [
       </ul>
       <div class="col right">
         <span class="label">© {new Date().getFullYear()} · {lang === 'es' ? 'Hecho con Astro' : 'Built with Astro'}</span>
-        <a class="label" href={path(lang)}>↑ {t('nav.home')}</a>
+        <a class="label" href={path(lang)}><Icon name="up" /> {t('nav.home')}</a>
       </div>
     </div>
   </div>
@@ -39,6 +48,35 @@ const links = [
     border-top: 1px solid var(--line);
     padding-block: 48px 28px;
     overflow: hidden;
+  }
+
+  .wrap {
+    position: relative;
+    isolation: isolate;
+  }
+
+  /* plants grow out of the top of the wordmark */
+  .meadow {
+    --mh: clamp(90px, 13vw, 190px);
+    height: var(--mh);
+    margin-bottom: calc(var(--mh) * -0.13);
+    padding-inline: 4%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    opacity: 0.6;
+    --plant-ink: var(--muted);
+    --plant-thin: var(--line-strong);
+  }
+
+  .meadow-plant {
+    height: var(--h);
+    aspect-ratio: 240 / 360;
+  }
+
+  .meadow-plant :global(.botanical) {
+    height: 100%;
+    width: auto;
   }
 
   .giant {

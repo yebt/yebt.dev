@@ -1,4 +1,5 @@
 ---
+import Icon from './Icon.astro';
 import type { CollectionEntry } from 'astro:content';
 import { formatDate, path, readingTime, slugOf, useTranslations } from '@/i18n/utils';
 import type { Lang } from '@/i18n/ui';
@@ -29,7 +30,7 @@ const hasVideo = video && video.provider !== 'pending';
       {hasVideo && <span class="tag video">▶ video</span>}
       <span class="label">{readingTime(entry.body)} {t('common.minutes')}</span>
     </span>
-    <span class="go mono" aria-hidden="true">{t('common.readMore')} →</span>
+    <span class="go mono" aria-hidden="true">{t('common.readMore')} <Icon name="right" /></span>
   </a>
 </li>
 

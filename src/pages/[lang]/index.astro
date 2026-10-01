@@ -1,6 +1,9 @@
 ---
+import Icon from '@/components/Icon.astro';
 import Base from '@/layouts/Base.astro';
 import Schematic from '@/components/Schematic.astro';
+import Botanical from '@/components/Botanical.astro';
+import Value from '@/components/Value.astro';
 import Window from '@/components/Window.astro';
 import CodeLines from '@/components/CodeLines.astro';
 import SectionHead from '@/components/SectionHead.astro';
@@ -24,6 +27,13 @@ const projects = (await getLocalized('projects', lang))
 const garden = (await getLocalized('garden', lang))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 4);
+
+const bootlog = [
+  ['OK', 'mount /projects'],
+  ['OK', 'start garden.service'],
+  ['OK', 'seed herbarium (6 species)'],
+  ['OK', lang === 'es' ? 'listo para contratar' : 'ready for hire'],
+];
 
 const code = [
   `const engineer = {`,
@@ -50,7 +60,7 @@ const code = [
       {(lang === 'es' ? 'diseño · construyo · despliego · mido · documento · repito' : 'design · build · deploy · measure · document · repeat').split(' · ').map((w) => <span>{w}</span>)}
     </p>
 
-    <h1 class="hero-title">
+    <h1 class="hero-title" data-boot="flicker">
       <span class="ln-a">{t('hero.title.a')}</span>
       <span class="ln-b wide">{t('hero.title.b')}</span>
       <span class="ln-c">{t('hero.title.c')}</span>
@@ -64,27 +74,32 @@ const code = [
             <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1v10M3.5 6.5 8 11l4.5-4.5M2 14.5h12" stroke="currentColor" stroke-width="1.5" fill="none"></path></svg>
             {t('hero.cta.cv')}
           </a>
-          <a class="btn" href={path(lang, 'projects')}>{t('hero.cta.projects')} →</a>
+          <a class="btn" href={path(lang, 'projects')}>{t('hero.cta.projects')} <Icon name="right" /></a>
         </div>
-        <Window title="engineer.ts" class="hero-code">
+        <Window title="engineer.ts" class="hero-code" boot>
           <CodeLines lines={code} />
         </Window>
       </div>
       <div class="hero-art">
         <Schematic />
+        <div class="hero-plant">
+          <Botanical species="flower" seed="hero-yebt" collage={false} speed={2.2} />
+        </div>
+        <pre class="bootlog label" data-boot="log" aria-hidden="true">{bootlog.map(([s, msg], i) => <span style={`--i:${i}`}><b>[ {s} ]</b> {msg}</span>)}</pre>
       </div>
     </div>
   </section>
 
   <!-- ============ IMPACT ============ -->
-  <section class="section wrap" aria-labelledby="impact">
+  <section class="section wrap" aria-labelledby="impact" data-boot>
+    <div class="specimen-bg spec-impact"><Botanical species="grass" seed="impact" collage={false} /></div>
     <SectionHead index="01" title={t('impact.title')} id="impact" />
     <ul class="impact">
       {
         impact.map((m) => (
           <li>
             <span class="num wide">
-              {m.value}
+              <Value value={m.value} />
               <small>{m.unit}</small>
             </span>
             <span class="label">{m.label[lang]}</span>
@@ -95,7 +110,8 @@ const code = [
   </section>
 
   <!-- ============ FEATURED PROJECTS ============ -->
-  <section class="section wrap" aria-labelledby="featured">
+  <section class="section wrap" aria-labelledby="featured" data-boot>
+    <div class="specimen-bg spec-featured"><Botanical species="fern" seed="featured" /></div>
     <SectionHead index="02" title={t('featured.title')} id="featured" href={path(lang, 'projects')} linkLabel={t('featured.all')} />
     <div class="cards">
       {projects.map((p, i) => <ProjectCard project={p} lang={lang} index={i} />)}
@@ -103,12 +119,15 @@ const code = [
   </section>
 
   <!-- ============ NOW + PRINCIPLES ============ -->
-  <section class="section wrap split" aria-labelledby="principles">
-    <div>
+  <section class="section wrap split" aria-labelledby="principles" data-boot>
+    <div class="now-col">
       <SectionHead index="03" title={t('now.title')} />
       <ol class="now">
         {now[lang].map((item, i) => <li><span class="label accent">{String(i + 1).padStart(2, '0')}</span><span>{item}</span></li>)}
       </ol>
+      <div class="now-plate">
+        <Botanical species="dandelion" seed="now-col" plate fig={3} meta={lang === 'es' ? 'semillas · en curso' : 'seeds · in progress'} />
+      </div>
     </div>
     <div>
       <SectionHead index="04" title={t('principles.title')} id="principles" />
@@ -126,7 +145,8 @@ const code = [
   </section>
 
   <!-- ============ GARDEN ============ -->
-  <section class="section wrap" aria-labelledby="garden">
+  <section class="section wrap" aria-labelledby="garden" data-boot>
+    <div class="specimen-bg spec-garden"><Botanical species="branch" seed="garden-home" /></div>
     <SectionHead index="05" title={t('garden.latest')} id="garden" href={path(lang, 'garden')} linkLabel={t('garden.all')} />
     {garden.length > 0 ? (
       <ul class="garden-list">{garden.map((g) => <GardenRow entry={g} lang={lang} />)}</ul>
@@ -136,7 +156,7 @@ const code = [
   </section>
 
   <!-- ============ STACK ============ -->
-  <section class="section wrap" aria-labelledby="stack">
+  <section class="section wrap" aria-labelledby="stack" data-boot>
     <SectionHead index="06" title={t('stack.title')} id="stack" />
     <dl class="stack">
       {
@@ -153,14 +173,19 @@ const code = [
   </section>
 
   <!-- ============ CONTACT ============ -->
-  <section class="section wrap contact" aria-labelledby="contact">
+  <section class="section wrap contact" aria-labelledby="contact" data-boot>
+    <div class="contact-copy">
     <SectionHead index="07" title={t('contact.title')} id="contact" />
     <p class="contact-lede">{t('contact.lede')}</p>
     <div class="ctas">
       {site.email && <a class="btn btn--accent" href={`mailto:${site.email}`}>{site.email}</a>}
-      {site.links.linkedin && <a class="btn" href={site.links.linkedin} rel="me noopener">LinkedIn →</a>}
-      <a class="btn" href={site.links.github} rel="me noopener">GitHub →</a>
-      <a class="btn" href={path(lang, 'cv')}>{t('nav.cv')} →</a>
+      {site.links.linkedin && <a class="btn" href={site.links.linkedin} rel="me noopener">LinkedIn <Icon name="up-right" /></a>}
+      <a class="btn" href={site.links.github} rel="me noopener">GitHub <Icon name="up-right" /></a>
+      <a class="btn" href={path(lang, 'cv')}>{t('nav.cv')} <Icon name="right" /></a>
+    </div>
+    </div>
+    <div class="contact-plate">
+      <Botanical species="flower" seed="contact-bloom" plate fig={7} name="Hirea yebtiana" meta="tuluá · co · utc−5" />
     </div>
   </section>
 </Base>
@@ -265,6 +290,73 @@ const code = [
     max-width: 460px;
     justify-self: end;
     width: 100%;
+  }
+
+  .hero-plant {
+    position: absolute;
+    left: -24%;
+    bottom: -4%;
+    width: 58%;
+    --plant-ink: var(--fg);
+    mix-blend-mode: normal;
+  }
+
+  .bootlog {
+    position: absolute;
+    right: 0;
+    bottom: -8px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.625rem;
+    text-align: left;
+    background: color-mix(in srgb, var(--bg) 80%, transparent);
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+  }
+
+  .bootlog b {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  :global(html.js) .bootlog span {
+    opacity: 0;
+  }
+
+  :global(html.js) .bootlog:global(.is-on) span {
+    animation: log-on 0.01s linear forwards;
+    animation-delay: calc(0.6s + var(--i) * 0.28s);
+  }
+
+  @keyframes log-on {
+    to {
+      opacity: 1;
+    }
+  }
+
+  .now-plate {
+    max-width: 260px;
+    margin-top: 40px;
+  }
+
+  .spec-impact {
+    right: -40px;
+    top: -60px;
+    width: 220px;
+  }
+
+  .spec-featured {
+    left: -150px;
+    top: 30px;
+    width: 260px;
+  }
+
+  .spec-garden {
+    right: -90px;
+    top: -40px;
+    width: 280px;
   }
 
   /* impact */
@@ -399,6 +491,17 @@ const code = [
     margin: 0;
   }
 
+  .contact {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+    gap: 48px;
+    align-items: end;
+  }
+
+  .contact-plate {
+    width: 100%;
+  }
+
   .contact-lede {
     font-family: var(--font-display);
     font-size: clamp(1.4rem, 3.4vw, 2.4rem);
@@ -417,6 +520,15 @@ const code = [
       justify-self: center;
       max-width: 380px;
       order: -1;
+    }
+    .contact {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .contact-plate {
+      max-width: 260px;
+    }
+    .now-plate {
+      display: none;
     }
     .impact {
       grid-template-columns: 1fr 1fr;

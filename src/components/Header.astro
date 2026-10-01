@@ -41,6 +41,10 @@ const other = otherLang(lang);
         <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor"></circle><path d="M12 1v22M1 12h22" stroke="currentColor" stroke-width=".75"></path><rect x="13" y="13" width="6" height="6" fill="var(--accent)"></rect></svg>
       </span>
       <span class="brand-name wide">yebt<span class="accent">.</span>dev</span>
+      <span class="leds" aria-hidden="true">
+        <i class="led pwr"></i><i class="led act"></i><i class="led net"></i>
+        <span class="sys label">sys·ok</span>
+      </span>
     </a>
 
     <nav aria-label="Main">
@@ -148,6 +152,54 @@ const other = otherLang(lang);
     letter-spacing: 0.02em;
   }
 
+  .leds {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 4px;
+    padding: 3px 6px;
+    border: 1px solid var(--line);
+  }
+
+  .led {
+    width: 5px;
+    height: 5px;
+    background: var(--line-strong);
+  }
+
+  .sys {
+    font-size: 0.5625rem;
+    margin-left: 3px;
+  }
+
+  .led.pwr {
+    animation: led-pwr 0.6s steps(1) 0.15s forwards;
+  }
+
+  .led.act {
+    animation: led-act 2.7s steps(1) 0.6s infinite;
+  }
+
+  .led.net {
+    animation: led-net 4.3s steps(1) 0.9s infinite;
+  }
+
+  @keyframes led-pwr {
+    0%, 30%, 60% { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    15%, 45% { background: var(--line-strong); box-shadow: none; }
+    100% { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  }
+
+  @keyframes led-act {
+    0%, 8%, 14%, 40%, 44%, 71% { background: var(--fg); }
+    4%, 11%, 20%, 42%, 50%, 75% { background: var(--line-strong); }
+  }
+
+  @keyframes led-net {
+    0%, 62% { background: var(--fg-2); }
+    60%, 66%, 100% { background: var(--line-strong); }
+  }
+
   .nav {
     display: flex;
     gap: clamp(10px, 2.2vw, 28px);
@@ -238,6 +290,7 @@ const other = otherLang(lang);
     .nav a .n {
       display: none;
     }
+    .sys,
     .hide-sm,
     .topline-mid {
       display: none !important;

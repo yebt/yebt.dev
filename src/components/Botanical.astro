@@ -1,0 +1,279 @@
+---
+/**
+ * A specimen from the "server herbarium": a procedurally grown plant drawn
+ * as line art, with collage blocks, crop marks and encyclopedia labels.
+ * Strokes draw themselves when the specimen scrolls into view.
+ */
+import { grow, pickLatin, W, H, type Species } from '@/lib/botany';
+
+interface Props {
+  species: Species;
+  seed?: string;
+  /** Frame + encyclopedia labels */
+  plate?: boolean;
+  collage?: boolean;
+  fig?: string | number;
+  name?: string;
+  meta?: string;
+  class?: string;
+  /** Total draw duration spread, seconds */
+  speed?: number;
+  ground?: boolean;
+}
+
+const {
+  species,
+  seed = species,
+  plate = false,
+  collage = true,
+  fig,
+  name = pickLatin(seed + species),
+  meta,
+  class: className,
+  speed = 1.8,
+  ground = true,
+} = Astro.props;
+
+const spec = grow(species, seed, { collage, ground });
+const id = `b${Math.random().toString(36).slice(2, 8)}`;
+const ht = `url(#${id}-ht)`;
+const figLabel = fig !== undefined ? `FIG. ${String(fig).padStart(2, '0')}` : 'FIG. —';
+const metaLabel = meta ?? `node-${String((seed.length * 7) % 97).padStart(2, '0')} · uptime 99.9${seed.length % 10}%`;
+
+const fillFor = (kind: string) => (kind === 'ht' ? ht : undefined);
+const delay = (at: number) => `--d:${(at * speed).toFixed(2)}s`;
+const c = spec.collage;
+const inverted = c && c.fill === 'acc';
+---
+
+<svg
+  class:list={['botanical', className]}
+  viewBox={`0 0 ${W} ${H}`}
+  aria-hidden="true"
+  focusable="false"
+  data-boot-target
+>
+  <defs>
+    <pattern id={`${id}-ht`} width="3.2" height="3.2" patternUnits="userSpaceOnUse" patternTransform="rotate(30)">
+      <circle cx="1" cy="1" r=".75" fill="var(--plant-ink, var(--fg-2))"></circle>
+    </pattern>
+    {c && <clipPath id={`${id}-clip`}><rect x={c.x} y={c.y} width={c.w} height={c.h}></rect></clipPath>}
+  </defs>
+
+  {
+    plate && (
+      <g class="plate">
+        <rect x="4" y="4" width={W - 8} height={H - 8} class="frame" />
+        <path d={`M4 ${H - 30}H${W - 4}`} class="frame" />
+        <text x="12" y="16" class="lbl acc-t">HERBARIUM / {figLabel}</text>
+        <text x={W - 12} y="16" class="lbl" text-anchor="end">
+          {species.toUpperCase()}
+        </text>
+        <text x="12" y={H - 16} class="lbl name">{name}</text>
+        <text x={W - 12} y={H - 16} class="lbl" text-anchor="end">
+          {metaLabel}
+        </text>
+        <path d="M12 28h40M12 25v6M32 26v4M52 25v6" class="frame" />
+        <text x="58" y="31" class="lbl">2cm</text>
+      </g>
+    )
+  }
+
+  {
+    c && (
+      <rect
+        x={c.x}
+        y={c.y}
+        width={c.w}
+        height={c.h}
+        class:list={['collage', `collage-${c.fill}`]}
+        fill={c.fill === 'ht' ? ht : undefined}
+        style={delay(0.2)}
+      />
+    )
+  }
+
+  {
+    spec.crop && (
+      <g class="crop" style={delay(0.1)}>
+        <rect x={spec.crop.x} y={spec.crop.y} width={spec.crop.w} height={spec.crop.h} pathLength="1" class="thin" />
+        <path
+          class="thin"
+          pathLength="1"
+          d={`M${spec.crop.x - 14} ${spec.crop.y}h-30M${spec.crop.x + spec.crop.w} ${spec.crop.y + spec.crop.h}h40M${spec.crop.x} ${spec.crop.y + spec.crop.h}v26`}
+        />
+      </g>
+    )
+  }
+
+  <g class="plant">
+    {
+      spec.marks.map((m) => {
+        const Tag = m.tag;
+        return <Tag {...m.attrs} class={`m-${m.kind}`} fill={fillFor(m.kind)} pathLength="1" style={delay(m.at)} />;
+      })
+    }
+  </g>
+
+  {
+    inverted && (
+      <g class="plant inv" clip-path={`url(#${id}-clip)`}>
+        {spec.marks
+          .filter((m) => m.kind === 'draw' || m.kind === 'thin')
+          .map((m) => {
+            const Tag = m.tag;
+            return <Tag {...m.attrs} class={`m-${m.kind}`} pathLength="1" style={delay(m.at)} />;
+          })}
+      </g>
+    )
+  }
+</svg>
+
+<style>
+  .botanical {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .botanical :global(.m-draw),
+  .botanical :global(.m-thin) {
+    fill: none;
+    stroke: var(--plant-ink, var(--fg-2));
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .botanical :global(.m-draw) {
+    stroke-width: 0.9;
+  }
+
+  .botanical :global(.m-thin),
+  .thin {
+    stroke-width: 0.5;
+    stroke: var(--plant-thin, var(--muted));
+    fill: none;
+  }
+
+  .botanical :global(.m-acc) {
+    fill: var(--accent);
+  }
+
+  .botanical :global(.m-solid) {
+    fill: var(--plant-ink, var(--fg-2));
+  }
+
+  .inv :global(.m-draw),
+  .inv :global(.m-thin) {
+    stroke: var(--accent-ink);
+  }
+
+  .collage-panel {
+    fill: var(--plant-panel, var(--bg-2));
+  }
+
+  .collage-acc {
+    fill: var(--accent);
+  }
+
+  .collage-ht {
+    fill-opacity: 0.55;
+  }
+
+  .frame {
+    fill: none;
+    stroke: var(--line-strong);
+    stroke-width: 0.6;
+  }
+
+  .lbl {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 7px;
+    letter-spacing: 0.06em;
+    fill: var(--muted);
+  }
+
+  .acc-t {
+    fill: var(--accent);
+  }
+
+  .name {
+    font-style: italic;
+    fill: var(--fg-2);
+  }
+
+  /* ---- drawing animation (only when JS can reveal it) ---- */
+  :global(html.js) .botanical :global(:is(.m-draw, .m-thin, .crop *)) {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
+  }
+
+  :global(html.js) .botanical :global(:is(.m-acc, .m-ht, .m-solid)),
+  :global(html.js) .botanical .collage {
+    opacity: 0;
+  }
+
+  :global(html.js) .botanical:global(.is-on) :global(:is(.m-draw, .m-thin)) {
+    animation: draw 1.7s cubic-bezier(0.55, 0.1, 0.25, 1) var(--d, 0s) forwards;
+  }
+
+  :global(html.js) .botanical:global(.is-on) .crop :global(*) {
+    animation: draw 1.2s ease var(--d, 0s) forwards;
+  }
+
+  :global(html.js) .botanical:global(.is-on) :global(:is(.m-acc, .m-ht, .m-solid)) {
+    animation: ink 0.9s steps(6) calc(var(--d, 0s) + 0.5s) forwards;
+  }
+
+  :global(html.js) .botanical:global(.is-on) .collage {
+    animation: ink-collage 0.7s steps(5) var(--d, 0s) forwards;
+  }
+
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes ink {
+    0% {
+      opacity: 0;
+    }
+    30% {
+      opacity: 0.7;
+    }
+    45% {
+      opacity: 0.2;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes ink-collage {
+    0% {
+      opacity: 0;
+    }
+    40% {
+      opacity: 0.6;
+    }
+    55% {
+      opacity: 0.15;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.js) .botanical :global(:is(.m-draw, .m-thin, .crop *)) {
+      stroke-dashoffset: 0;
+    }
+    :global(html.js) .botanical :global(:is(.m-acc, .m-ht, .m-solid)),
+    :global(html.js) .botanical .collage {
+      opacity: 1;
+    }
+  }
+</style>

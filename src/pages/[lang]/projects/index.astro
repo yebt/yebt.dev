@@ -1,4 +1,5 @@
 ---
+import Botanical from '@/components/Botanical.astro';
 import Base from '@/layouts/Base.astro';
 import ProjectCard from '@/components/ProjectCard.astro';
 import type { Lang } from '@/i18n/ui';
@@ -15,6 +16,7 @@ const projects = (await getLocalized('projects', lang)).sort(
 
 <Base title={t('projects.title')} description={t('projects.lede')}>
   <header class="page-head wrap">
+    <div class="specimen-bg head-spec"><Botanical species="fern" seed="projects-index" plate fig={1} /></div>
     <span class="label accent">01 — {projects.length.toString().padStart(2, '0')} {lang === 'es' ? 'casos' : 'cases'}</span>
     <h1>{t('projects.title')}</h1>
     <p class="lede">{t('projects.lede')}</p>
@@ -25,6 +27,19 @@ const projects = (await getLocalized('projects', lang)).sort(
 </Base>
 
 <style>
+  .head-spec {
+    right: var(--gutter);
+    bottom: 0;
+    width: clamp(160px, 22vw, 260px);
+    opacity: 0.75;
+  }
+
+  @media (max-width: 760px) {
+    .head-spec {
+      display: none;
+    }
+  }
+
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));

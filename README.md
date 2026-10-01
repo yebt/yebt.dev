@@ -58,3 +58,8 @@ See `src/content/projects/en/deploy-pipeline.md`. Key fields: `featured`, `order
 ## Deploy
 
 Any static host (Cloudflare Pages, Netlify, Vercel, GitHub Pages): build command `npm run build`, output `dist/`.
+
+## Herbarium & power-on effects
+
+- `src/lib/botany.ts` grows procedural plants (`flower`, `fern`, `grass`, `branch`, `dandelion`, `sprout`) from a seed; `<Botanical species="fern" seed="x" plate fig={1} />` renders one as an encyclopedia plate. Strokes draw themselves when scrolled into view.
+- Add `data-boot` to any block to make it flicker on when it enters the viewport (`data-boot="crt"` for a CRT power-on). The first page of a session gets a single scanline sweep. Everything respects `prefers-reduced-motion` and renders fully without JS.

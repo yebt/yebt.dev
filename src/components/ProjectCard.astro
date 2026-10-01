@@ -1,4 +1,5 @@
 ---
+import Value from './Value.astro';
 import type { CollectionEntry } from 'astro:content';
 import { path, slugOf, useTranslations } from '@/i18n/utils';
 import type { Lang } from '@/i18n/ui';
@@ -28,7 +29,7 @@ const href = path(lang, 'projects', slugOf(project));
         {outcomes.slice(0, 3).map((o) => (
           <div>
             <dt class="label">{o.label}</dt>
-            <dd>{o.value}</dd>
+            <dd><Value value={o.value} /></dd>
           </div>
         ))}
       </dl>
@@ -36,7 +37,7 @@ const href = path(lang, 'projects', slugOf(project));
   }
   <footer class="bottom">
     <ul class="tags">{stack.slice(0, 5).map((s) => <li class="tag">{s}</li>)}</ul>
-    <span class="arrow-link">{role}</span>
+    <span class="label role">{role}</span>
   </footer>
 </article>
 

@@ -1,4 +1,6 @@
 ---
+import Botanical from '@/components/Botanical.astro';
+import Icon from '@/components/Icon.astro';
 import Base from '@/layouts/Base.astro';
 import Schematic from '@/components/Schematic.astro';
 import { getLangFromUrl, path, useTranslations } from '@/i18n/utils';
@@ -13,10 +15,13 @@ const t = useTranslations(lang);
       <span class="label accent">ERR · 404</span>
       <h1 class="wide">{t('404.title')}</h1>
       <p class="lede">{t('404.lede')}</p>
-      <a class="btn btn--accent" href={path(lang)}>{t('404.back')} →</a>
+      <a class="btn btn--accent" href={path(lang)}>{t('404.back')} <Icon name="right" /></a>
       <p class="label alt"><a href="/en/">English</a> · <a href="/es/">Español</a></p>
     </div>
-    <Schematic class="art" label="SIGNAL — LOST" />
+    <div class="art">
+      <Schematic label="SIGNAL — LOST" />
+      <div class="art-plant"><Botanical species="dandelion" seed="404" collage={false} /></div>
+    </div>
   </section>
 </Base>
 
@@ -36,6 +41,16 @@ const t = useTranslations(lang);
   .lede {
     color: var(--fg-2);
     margin-bottom: 28px;
+  }
+  .art {
+    position: relative;
+  }
+  .art-plant {
+    position: absolute;
+    left: -10%;
+    bottom: -4%;
+    width: 55%;
+    --plant-ink: var(--fg);
   }
   .alt {
     margin-top: 20px;
