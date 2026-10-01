@@ -1,0 +1,55 @@
+---
+/** Terminal / editor-like frame inspired by code-poster layouts. */
+interface Props {
+  title: string;
+  class?: string;
+  as?: 'div' | 'section' | 'aside';
+}
+const { title, class: className, as: Tag = 'div' } = Astro.props;
+---
+
+<Tag class:list={['window', className]}>
+  <div class="window-bar">
+    <span class="window-tab">{title}</span>
+    <span class="window-ctrl" aria-hidden="true">▼ ✕</span>
+  </div>
+  <div class="window-body">
+    <slot />
+  </div>
+</Tag>
+
+<style>
+  .window {
+    position: relative;
+    border: 1px solid var(--line-strong);
+    background: var(--panel);
+    border-radius: var(--radius);
+  }
+
+  .window-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    border-bottom: 1px solid var(--line-strong);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  .window-tab {
+    padding: 8px 28px 8px 14px;
+    border-right: 1px solid var(--line-strong);
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 100%, 0 100%);
+    background: var(--bg);
+    color: var(--fg-2);
+  }
+
+  .window-ctrl {
+    padding: 8px 12px;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+  }
+
+  .window-body {
+    padding: 0;
+  }
+</style>

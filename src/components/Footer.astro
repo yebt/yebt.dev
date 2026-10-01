@@ -1,0 +1,94 @@
+---
+import { site } from '@/data/site';
+import { getLangFromUrl, path, useTranslations } from '@/i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const links = [
+  site.email && { label: 'Email', href: `mailto:${site.email}` },
+  site.links.github && { label: 'GitHub', href: site.links.github },
+  site.links.linkedin && { label: 'LinkedIn', href: site.links.linkedin },
+  site.links.youtube && { label: 'YouTube', href: site.links.youtube },
+  { label: 'RSS', href: `/${lang}/garden/rss.xml` },
+].filter(Boolean) as { label: string; href: string }[];
+---
+
+<footer class="footer">
+  <div class="wrap">
+    <p class="giant wide" aria-hidden="true">yebt<span class="accent">.</span>dev</p>
+    <div class="row">
+      <div class="col">
+        <span class="label">{site.name}</span>
+        <span class="label">{t('hero.kicker')}</span>
+      </div>
+      <ul class="links">
+        {links.map((l) => <li><a class="arrow-link" href={l.href} rel={l.href.startsWith('http') ? 'me noopener' : undefined}>{l.label}</a></li>)}
+        <li><a class="arrow-link" href={site.cv[lang]} download>{t('nav.cv')} · PDF</a></li>
+      </ul>
+      <div class="col right">
+        <span class="label">© {new Date().getFullYear()} · {lang === 'es' ? 'Hecho con Astro' : 'Built with Astro'}</span>
+        <a class="label" href={path(lang)}>↑ {t('nav.home')}</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--line);
+    padding-block: 48px 28px;
+    overflow: hidden;
+  }
+
+  .giant {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(3rem, 15vw, 13rem);
+    line-height: 0.8;
+    letter-spacing: -0.04em;
+    margin-bottom: 40px;
+    white-space: nowrap;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .right {
+    text-align: right;
+    align-items: flex-end;
+  }
+
+  .right a {
+    text-decoration: none;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (max-width: 760px) {
+    .row {
+      grid-template-columns: 1fr;
+    }
+    .right {
+      text-align: left;
+      align-items: flex-start;
+    }
+  }
+</style>

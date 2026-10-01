@@ -1,0 +1,43 @@
+---
+/** Bare CV page used by `npm run cv:pdf` to produce the ATS PDF. */
+import CvDocument from '@/components/CvDocument.astro';
+import { site } from '@/data/site';
+import type { Lang } from '@/i18n/ui';
+import { getStaticLangPaths } from '@/i18n/utils';
+import { cv } from '@/data/cv';
+
+export const getStaticPaths = getStaticLangPaths;
+const lang = Astro.params.lang as Lang;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{site.name} — {cv.headline[lang]}</title>
+    <meta name="author" content={site.name} />
+    <style is:global>
+      @page {
+        size: Letter;
+        margin: 0.6in 0.65in;
+      }
+      html,
+      body {
+        margin: 0;
+        background: #fff;
+      }
+      @media screen {
+        body {
+          max-width: 8.5in;
+          margin: 0 auto;
+          padding: 0.6in 0.65in;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <CvDocument lang={lang} />
+  </body>
+</html>

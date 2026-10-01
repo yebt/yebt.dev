@@ -1,0 +1,165 @@
+---
+import Base from '@/layouts/Base.astro';
+import type { Lang } from '@/i18n/ui';
+import { formatDate, getLocalized, getStaticLangPaths, useTranslations } from '@/i18n/utils';
+
+export const getStaticPaths = getStaticLangPaths;
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+const items = (await getLocalized('resources', lang)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const types = [...new Set(items.map((i) => i.data.type))];
+---
+
+<Base title={t('resources.title')} description={t('resources.lede')}>
+  <header class="page-head wrap">
+    <span class="label accent">03 — {lang === 'es' ? 'herramientas · plantillas · scripts' : 'tools · templates · scripts'}</span>
+    <h1>{t('resources.title')}</h1>
+    <p class="lede">{t('resources.lede')}</p>
+    {
+      types.length > 1 && (
+        <div class="filters" role="group" aria-label="Filter">
+          <button type="button" class="tag on" data-filter="all" aria-pressed="true">{t('resources.all')}</button>
+          {types.map((type) => <button type="button" class="tag" data-filter={type} aria-pressed="false">{type}</button>)}
+        </div>
+      )
+    }
+  </header>
+
+  <section class="wrap list">
+    {
+      items.length === 0 ? (
+        <p class="label empty">{t('resources.empty')}</p>
+      ) : (
+        <ul class="grid">
+          {items.map((r, i) => {
+            const isExternal = r.data.url?.startsWith('http');
+            return (
+              <li class="item" data-type={r.data.type}>
+                <div class="top">
+                  <span class="label accent">R.{String(i + 1).padStart(2, '0')} · {r.data.type}</span>
+                  <span class="label">{formatDate(r.data.date, lang, { day: undefined })}</span>
+                </div>
+                <h2>
+                  {r.data.title}
+                  {r.data.draft && <span class="tag draft">{t('common.draft')}</span>}
+                </h2>
+                <p>{r.data.description}</p>
+                <div class="bottom">
+                  <ul class="tags">{r.data.tags.map((tag) => <li class="tag">#{tag}</li>)}</ul>
+                  {r.data.url && (
+                    <a class="arrow-link" href={r.data.url} rel={isExternal ? 'noopener' : undefined}>
+                      {t('resources.open')}
+                    </a>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )
+    }
+  </section>
+</Base>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+  const items = document.querySelectorAll<HTMLElement>('[data-type]');
+  buttons.forEach((btn) =>
+    btn.addEventListener('click', () => {
+      const f = btn.dataset.filter;
+      buttons.forEach((b) => {
+        const on = b === btn;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+      items.forEach((el) => (el.hidden = f !== 'all' && el.dataset.type !== f));
+    }),
+  );
+</script>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 28px;
+  }
+
+  .filters button {
+    background: transparent;
+    cursor: pointer;
+    padding: 0.45em 0.8em;
+  }
+
+  .filters button.on {
+    background: var(--fg);
+    color: var(--bg);
+    border-color: var(--fg);
+  }
+
+  .list {
+    padding-bottom: clamp(56px, 9vw, 112px);
+  }
+
+  .grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+
+  .item {
+    background: var(--bg);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .item[hidden] {
+    display: none;
+  }
+
+  .top,
+  .bottom {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .bottom {
+    margin-top: auto;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .item p {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--fg-2);
+    line-height: 1.6;
+  }
+
+  .draft {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .empty {
+    padding: 48px 0;
+    border-top: 1px solid var(--line-strong);
+  }
+</style>

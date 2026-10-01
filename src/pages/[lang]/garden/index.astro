@@ -1,0 +1,116 @@
+---
+import Base from '@/layouts/Base.astro';
+import GardenRow from '@/components/GardenRow.astro';
+import type { Lang } from '@/i18n/ui';
+import { getLocalized, getStaticLangPaths, useTranslations } from '@/i18n/utils';
+
+export const getStaticPaths = getStaticLangPaths;
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+const entries = (await getLocalized('garden', lang)).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const byYear = Map.groupBy(entries, (e) => e.data.date.getUTCFullYear());
+const stages = ['seedling', 'budding', 'evergreen'] as const;
+---
+
+<Base title={t('garden.title')} description={t('garden.lede')}>
+  <header class="page-head wrap">
+    <span class="label accent">02 — {lang === 'es' ? 'notas · videos · diseño de sistemas' : 'notes · videos · system design'}</span>
+    <h1>{t('garden.title')}</h1>
+    <p class="lede">{t('garden.lede')}</p>
+    <div class="legend">
+      {stages.map((s) => <span class:list={['stage', s]}>{t(`garden.stage.${s}`)}</span>)}
+      <a class="label rss" href={`/${lang}/garden/rss.xml`}>{t('garden.rss')} ↗</a>
+    </div>
+  </header>
+
+  <section class="wrap list">
+    {
+      entries.length === 0 ? (
+        <p class="label">{t('garden.empty')}</p>
+      ) : (
+        [...byYear].map(([year, items]) => (
+          <div class="year">
+            <h2 class="year-label wide">{year}</h2>
+            <ul>{items.map((g) => <GardenRow entry={g} lang={lang} />)}</ul>
+          </div>
+        ))
+      )
+    }
+  </section>
+</Base>
+
+<style>
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 28px;
+    align-items: center;
+  }
+
+  .stage {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--fg-2);
+  }
+
+  .stage::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+  }
+
+  .stage.budding::before {
+    background: linear-gradient(90deg, var(--accent) 50%, transparent 50%);
+  }
+
+  .stage.evergreen::before {
+    background: var(--accent);
+  }
+
+  .rss {
+    margin-left: auto;
+    text-decoration: none;
+  }
+
+  .list {
+    padding-bottom: clamp(56px, 9vw, 112px);
+  }
+
+  .year {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 24px;
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .year-label {
+    font-size: 1.5rem;
+    padding-top: 18px;
+    color: var(--muted);
+  }
+
+  .year ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .year ul :global(.row:last-child) {
+    border-bottom: 0;
+  }
+
+  @media (max-width: 760px) {
+    .year {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+</style>

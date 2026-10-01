@@ -1,0 +1,246 @@
+---
+import { site } from '@/data/site';
+import { getLangFromUrl, otherLang, path, swapLang, useTranslations } from '@/i18n/utils';
+import Globe from './Globe.astro';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const current = Astro.url.pathname;
+
+const nav = [
+  { href: path(lang), label: t('nav.home'), n: '00' },
+  { href: path(lang, 'projects'), label: t('nav.projects'), n: '01' },
+  { href: path(lang, 'garden'), label: t('nav.garden'), n: '02' },
+  { href: path(lang, 'resources'), label: t('nav.resources'), n: '03' },
+  { href: path(lang, 'cv'), label: t('nav.cv'), n: '04' },
+];
+
+const isActive = (href: string) => (href === path(lang) ? current === href : current.startsWith(href));
+const other = otherLang(lang);
+---
+
+<header class="header">
+  <div class="topline wrap">
+    <span class="topline-left label">
+      <Globe size={14} />
+      <span>{site.domain}</span>
+    </span>
+    <span class="topline-mid label">
+      <span class="pill" aria-hidden="true"></span>
+      <span>{site.location}</span>
+    </span>
+    <span class="topline-right label">
+      <span class="hide-sm">{site.timezone} ·</span>
+      <span>© {new Date().getFullYear()}</span>
+      <Globe size={14} />
+    </span>
+  </div>
+  <div class="bar wrap">
+    <a class="brand" href={path(lang)} aria-label={site.name}>
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor"></circle><path d="M12 1v22M1 12h22" stroke="currentColor" stroke-width=".75"></path><rect x="13" y="13" width="6" height="6" fill="var(--accent)"></rect></svg>
+      </span>
+      <span class="brand-name wide">yebt<span class="accent">.</span>dev</span>
+    </a>
+
+    <nav aria-label="Main">
+      <ul class="nav">
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+                <span class="n">{item.n}</span>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="tools">
+      <a class="tool" href={swapLang(Astro.url, other)} hreflang={other} lang={other} title={t('lang.switch')}>
+        <span class:list={{ on: lang === 'en' }}>EN</span><span class="slash">/</span><span class:list={{ on: lang === 'es' }}>ES</span>
+      </a>
+      <button class="tool theme" type="button" aria-label={t('theme.toggle')} title={t('theme.toggle')} data-theme-toggle>
+        <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor"></circle><path d="M10 2a8 8 0 0 1 0 16z" fill="currentColor"></path></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  document.querySelectorAll<HTMLAnchorElement>('a[hreflang]').forEach((a) =>
+    a.addEventListener('click', () => {
+      try {
+        localStorage.setItem('lang', a.hreflang);
+      } catch {}
+    }),
+  );
+  document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
+    const root = document.documentElement;
+    const next = root.dataset.theme === 'light' ? 'dark' : 'light';
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem('theme', next);
+    } catch {}
+  });
+</script>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .topline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-block: 8px;
+    border-bottom: 1px dashed var(--line);
+  }
+
+  .topline > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent);
+  }
+
+  .topline-mid {
+    color: var(--muted) !important;
+  }
+
+  .pill {
+    width: 22px;
+    height: 7px;
+    border-radius: 99px;
+    background: var(--accent);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-block: 12px;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--fg);
+  }
+
+  .brand-name {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+  }
+
+  .nav {
+    display: flex;
+    gap: clamp(10px, 2.2vw, 28px);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav a {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    text-decoration: none;
+    color: var(--fg-2);
+    display: inline-flex;
+    gap: 6px;
+    align-items: baseline;
+    padding-block: 4px;
+    border-bottom: 1px solid transparent;
+  }
+
+  .nav a .n {
+    font-size: 0.625rem;
+    color: var(--muted);
+  }
+
+  .nav a:hover,
+  .nav a[aria-current='page'] {
+    color: var(--fg);
+    border-bottom-color: var(--accent);
+  }
+
+  .nav a[aria-current='page'] .n {
+    color: var(--accent);
+  }
+
+  .tools {
+    display: flex;
+    gap: 8px;
+  }
+
+  .tool {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .tool:hover {
+    border-color: var(--line-strong);
+    color: var(--fg);
+  }
+
+  .tool .on {
+    color: var(--fg);
+  }
+
+  .tool .slash {
+    margin-inline: 3px;
+    color: var(--line-strong);
+  }
+
+  @media (max-width: 860px) {
+    .bar {
+      flex-wrap: wrap;
+    }
+    nav {
+      order: 3;
+      width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
+      margin-inline: calc(var(--gutter) * -1);
+      padding-inline: var(--gutter);
+      width: calc(100% + var(--gutter) * 2);
+    }
+    .nav {
+      gap: 18px;
+    }
+    .nav a .n {
+      display: none;
+    }
+    .hide-sm,
+    .topline-mid {
+      display: none !important;
+    }
+  }
+</style>

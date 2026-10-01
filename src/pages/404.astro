@@ -1,0 +1,48 @@
+---
+import Base from '@/layouts/Base.astro';
+import Schematic from '@/components/Schematic.astro';
+import { getLangFromUrl, path, useTranslations } from '@/i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
+<Base title="404" noindex>
+  <section class="wrap nf">
+    <div>
+      <span class="label accent">ERR · 404</span>
+      <h1 class="wide">{t('404.title')}</h1>
+      <p class="lede">{t('404.lede')}</p>
+      <a class="btn btn--accent" href={path(lang)}>{t('404.back')} →</a>
+      <p class="label alt"><a href="/en/">English</a> · <a href="/es/">Español</a></p>
+    </div>
+    <Schematic class="art" label="SIGNAL — LOST" />
+  </section>
+</Base>
+
+<style>
+  .nf {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 48px;
+    align-items: center;
+    padding-block: clamp(48px, 10vw, 140px);
+  }
+  h1 {
+    font-size: clamp(2.6rem, 8vw, 6rem);
+    margin: 16px 0 20px;
+    line-height: 0.9;
+  }
+  .lede {
+    color: var(--fg-2);
+    margin-bottom: 28px;
+  }
+  .alt {
+    margin-top: 20px;
+  }
+  @media (max-width: 760px) {
+    .nf {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

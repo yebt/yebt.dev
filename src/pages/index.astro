@@ -1,0 +1,37 @@
+---
+/** Root: send visitors to their language, defaulting to English. */
+import { site } from '@/data/site';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{site.name}</title>
+    <link rel="canonical" href={`${site.url}/en/`} />
+    <link rel="alternate" hreflang="en" href={`${site.url}/en/`} />
+    <link rel="alternate" hreflang="es" href={`${site.url}/es/`} />
+    <link rel="alternate" hreflang="x-default" href={`${site.url}/en/`} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script is:inline>
+      (function () {
+        var lang = 'en';
+        try {
+          var saved = localStorage.getItem('lang');
+          var nav = (navigator.languages || [navigator.language || 'en']).join(',').toLowerCase();
+          lang = saved === 'es' || saved === 'en' ? saved : /(^|,)es/.test(nav) ? 'es' : 'en';
+        } catch (e) {}
+        location.replace('/' + lang + '/');
+      })();
+    </script>
+    <meta http-equiv="refresh" content="1; url=/en/" />
+    <style>
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0d0d0c; color: #ece7dd; font: 14px ui-monospace, monospace; }
+      a { color: #ec4a32; margin: 0 8px; }
+    </style>
+  </head>
+  <body>
+    <p><a href="/en/">English</a> / <a href="/es/">Español</a></p>
+  </body>
+</html>

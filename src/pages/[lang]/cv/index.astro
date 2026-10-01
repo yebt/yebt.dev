@@ -1,0 +1,86 @@
+---
+import Base from '@/layouts/Base.astro';
+import CvDocument from '@/components/CvDocument.astro';
+import { site } from '@/data/site';
+import type { Lang } from '@/i18n/ui';
+import { getStaticLangPaths, otherLang, path, useTranslations } from '@/i18n/utils';
+
+export const getStaticPaths = getStaticLangPaths;
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+const other = otherLang(lang);
+---
+
+<Base title={t('cv.title')} description={t('cv.lede')}>
+  <header class="page-head wrap">
+    <span class="label accent">04 — ATS · PDF · {lang.toUpperCase()}</span>
+    <h1>{t('nav.cv')}</h1>
+    <p class="lede">{t('cv.lede')}</p>
+    <div class="ctas">
+      <a class="btn btn--accent" href={site.cv[lang]} download>↓ {t('cv.download')} ({lang.toUpperCase()})</a>
+      <a class="btn" href={site.cv[other]} download>↓ PDF ({other.toUpperCase()})</a>
+      <a class="btn" href={path(other, 'cv')} hreflang={other}>{t('cv.other')} →</a>
+    </div>
+  </header>
+
+  <section class="wrap sheet-wrap">
+    <div class="sheet">
+      <span class="corner tl" aria-hidden="true"></span>
+      <span class="corner br" aria-hidden="true"></span>
+      <CvDocument lang={lang} />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 28px;
+  }
+
+  .sheet-wrap {
+    padding-bottom: clamp(56px, 9vw, 112px);
+  }
+
+  .sheet {
+    position: relative;
+    max-width: 840px;
+    margin-inline: auto;
+    background: #fff;
+    padding: clamp(20px, 6vw, 64px);
+    box-shadow: 0 0 0 1px var(--line-strong), 18px 18px 0 0 var(--accent);
+  }
+
+  .corner {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--fg);
+  }
+
+  .tl {
+    top: -22px;
+    left: -22px;
+    border-right: 0;
+    border-bottom: 0;
+  }
+
+  .br {
+    bottom: -22px;
+    right: -22px;
+    border-left: 0;
+    border-top: 0;
+  }
+
+  @media (max-width: 560px) {
+    .sheet {
+      box-shadow: 0 0 0 1px var(--line-strong), 8px 8px 0 0 var(--accent);
+    }
+    .corner {
+      display: none;
+    }
+  }
+</style>

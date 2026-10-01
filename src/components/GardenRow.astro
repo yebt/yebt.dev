@@ -1,0 +1,140 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate, path, readingTime, slugOf, useTranslations } from '@/i18n/utils';
+import type { Lang } from '@/i18n/ui';
+
+interface Props {
+  entry: CollectionEntry<'garden'>;
+  lang: Lang;
+}
+const { entry, lang } = Astro.props;
+const t = useTranslations(lang);
+const { title, description, date, stage, kind, video, draft } = entry.data;
+const hasVideo = video && video.provider !== 'pending';
+---
+
+<li class="row">
+  <a href={path(lang, 'garden', slugOf(entry))}>
+    <span class="date label">{formatDate(date, lang)}</span>
+    <span class="main">
+      <span class="title">
+        {title}
+        {draft && <span class="tag draft">{t('common.draft')}</span>}
+      </span>
+      <span class="desc">{description}</span>
+    </span>
+    <span class="meta">
+      <span class="tag">{kind}</span>
+      <span class:list={['stage', stage]} title={t(`garden.stage.${stage}`)}>{t(`garden.stage.${stage}`)}</span>
+      {hasVideo && <span class="tag video">▶ video</span>}
+      <span class="label">{readingTime(entry.body)} {t('common.minutes')}</span>
+    </span>
+    <span class="go mono" aria-hidden="true">{t('common.readMore')} →</span>
+  </a>
+</li>
+
+<style>
+  .row {
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  a {
+    display: grid;
+    grid-template-columns: 110px 1fr auto auto;
+    gap: 20px;
+    align-items: center;
+    padding: 18px 0;
+    text-decoration: none;
+    color: var(--fg);
+  }
+
+  a:hover .title,
+  a:hover .go {
+    color: var(--accent);
+  }
+
+  .main {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.15rem;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .desc {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .meta {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .stage {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--fg-2);
+  }
+
+  .stage::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+  }
+
+  .stage.budding::before {
+    background: linear-gradient(90deg, var(--accent) 50%, transparent 50%);
+  }
+
+  .stage.evergreen::before {
+    background: var(--accent);
+  }
+
+  .video {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .draft {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .go {
+    font-size: 0.8125rem;
+    color: var(--fg-2);
+  }
+
+  @media (max-width: 760px) {
+    a {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .meta {
+      justify-content: flex-start;
+    }
+    .go {
+      display: none;
+    }
+  }
+</style>

@@ -1,0 +1,133 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { path, slugOf, useTranslations } from '@/i18n/utils';
+import type { Lang } from '@/i18n/ui';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  lang: Lang;
+  index: number;
+}
+const { project, lang, index } = Astro.props;
+const t = useTranslations(lang);
+const { title, summary, year, stack, outcomes, role, draft } = project.data;
+const href = path(lang, 'projects', slugOf(project));
+---
+
+<article class="card">
+  <a class="cover" href={href} aria-label={title}></a>
+  <header class="top">
+    <span class="label idx">P.{String(index + 1).padStart(2, '0')}</span>
+    <span class="year mono">{year}</span>
+  </header>
+  <h3>{title}{draft && <span class="tag draft">{t('common.draft')}</span>}</h3>
+  <p class="summary">{summary}</p>
+  {
+    outcomes.length > 0 && (
+      <dl class="outcomes">
+        {outcomes.slice(0, 3).map((o) => (
+          <div>
+            <dt class="label">{o.label}</dt>
+            <dd>{o.value}</dd>
+          </div>
+        ))}
+      </dl>
+    )
+  }
+  <footer class="bottom">
+    <ul class="tags">{stack.slice(0, 5).map((s) => <li class="tag">{s}</li>)}</ul>
+    <span class="arrow-link">{role}</span>
+  </footer>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 20px;
+    border: 1px solid var(--line);
+    background: var(--bg-2);
+    border-radius: var(--radius);
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+  }
+
+  .card:hover h3 {
+    color: var(--accent);
+  }
+
+  .cover {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .idx {
+    color: var(--accent);
+  }
+
+  .year {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+  }
+
+  h3 {
+    font-size: 1.4rem;
+    transition: color 0.2s;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .draft {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .summary {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.65;
+    color: var(--fg-2);
+  }
+
+  .outcomes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding-top: 12px;
+    border-top: 1px dashed var(--line);
+  }
+
+  .outcomes dd {
+    margin: 2px 0 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.25rem;
+    font-variation-settings: 'wdth' 110;
+  }
+
+  .bottom {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+</style>

@@ -1,0 +1,67 @@
+---
+/** Plain code listing with a line-number gutter. Pass pre-escaped text lines. */
+interface Props {
+  lines: string[];
+  start?: number;
+}
+const { lines, start = 1 } = Astro.props;
+
+// Tiny highlighter: strings, comments, keywords, numbers.
+const hl = (src: string) =>
+  src
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/(\/\/.*$)/g, '<span class="c">$1</span>')
+    .replace(/('[^']*')/g, '<span class="s">$1</span>')
+    .replace(/\b(const|return|type|await|new)\b/g, '<span class="k">$1</span>')
+    .replace(/\b(\d+(?:\.\d+)?)\b(?![^<]*>)/g, '<span class="n">$1</span>');
+---
+
+<pre class="code" aria-label="code"><code>{lines.map((line, i) => (
+  <span class="line"><span class="ln" aria-hidden="true">{i + start}</span><span set:html={hl(line) || ' '} /></span>
+))}</code></pre>
+
+<style>
+  .code {
+    margin: 0;
+    padding: 14px 0;
+    font-family: var(--font-mono);
+    font-size: clamp(0.72rem, 1.6vw, 0.8125rem);
+    line-height: 1.75;
+    overflow-x: auto;
+    color: var(--fg-2);
+  }
+
+  .line {
+    display: block;
+    padding-right: 16px;
+    white-space: pre;
+  }
+
+  .ln {
+    display: inline-block;
+    width: 3.2em;
+    padding-right: 1.2em;
+    text-align: right;
+    color: var(--muted);
+    opacity: 0.6;
+    user-select: none;
+    border-right: 1px solid var(--line);
+    margin-right: 1em;
+  }
+
+  .code :global(.s) {
+    color: var(--accent);
+  }
+  .code :global(.c) {
+    color: var(--muted);
+    font-style: italic;
+  }
+  .code :global(.k) {
+    color: var(--fg);
+    font-weight: 700;
+  }
+  .code :global(.n) {
+    color: var(--accent-2);
+  }
+</style>

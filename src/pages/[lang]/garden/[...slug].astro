@@ -1,0 +1,171 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '@/layouts/Base.astro';
+import VideoEmbed from '@/components/VideoEmbed.astro';
+import type { Lang } from '@/i18n/ui';
+import { formatDate, getLocalized, langOf, path, readingTime, slugOf, useTranslations } from '@/i18n/utils';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('garden', (e) => import.meta.env.DEV || !e.data.draft);
+  return entries.map((entry) => ({
+    params: { lang: langOf(entry), slug: slugOf(entry) },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+const { Content, headings } = await render(entry);
+const d = entry.data;
+
+const project = d.project ? (await getLocalized('projects', lang)).find((p) => slugOf(p) === d.project) : undefined;
+const toc = headings.filter((h) => h.depth === 2);
+---
+
+<Base title={d.title} description={d.description} type="article">
+  <article class="wrap entry">
+    <header class="head">
+      <a class="arrow-link back" href={path(lang, 'garden')}>← {t('garden.back')}</a>
+      <div class="meta label">
+        <span class="accent">{d.kind}</span>
+        <span>·</span>
+        <time datetime={d.date.toISOString()}>{formatDate(d.date, lang)}</time>
+        {d.updated && <span>· {t('common.updated')} {formatDate(d.updated, lang)}</span>}
+        <span>· {readingTime(entry.body)} {t('common.minutes')}</span>
+        <span>· {t(`garden.stage.${d.stage}`)}</span>
+      </div>
+      <h1>{d.title}</h1>
+      <p class="lede">{d.description}</p>
+    </header>
+
+    {d.video && <div class="video-wrap"><VideoEmbed video={d.video} title={d.title} pendingLabel={t('garden.video.pending')} /></div>}
+
+    <div class="layout">
+      <aside class="side">
+        {
+          project && (
+            <div class="side-block">
+              <span class="label">{t('garden.project')}</span>
+              <a class="arrow-link" href={path(lang, 'projects', slugOf(project))}>{project.data.title}</a>
+            </div>
+          )
+        }
+        {
+          toc.length > 0 && (
+            <nav class="side-block" aria-label="TOC">
+              <span class="label">{lang === 'es' ? 'Contenido' : 'Contents'}</span>
+              <ol>{toc.map((h, i) => <li><a href={`#${h.slug}`}><span class="accent">{String(i + 1).padStart(2, '0')}</span> {h.text}</a></li>)}</ol>
+            </nav>
+          )
+        }
+        {
+          d.tags.length > 0 && (
+            <div class="side-block">
+              <span class="label">Tags</span>
+              <ul class="tags">{d.tags.map((tag) => <li class="tag">#{tag}</li>)}</ul>
+            </div>
+          )
+        }
+      </aside>
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .entry {
+    padding-bottom: clamp(56px, 9vw, 112px);
+  }
+
+  .head {
+    padding-block: clamp(40px, 7vw, 88px) 32px;
+    max-width: 920px;
+  }
+
+  .back {
+    display: inline-block;
+    margin-bottom: 28px;
+  }
+
+  .back::after {
+    content: '' !important;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5.5vw, 4rem);
+    letter-spacing: -0.025em;
+  }
+
+  .lede {
+    margin-top: 18px;
+    color: var(--fg-2);
+    max-width: 62ch;
+    font-size: 1.1rem;
+  }
+
+  .video-wrap {
+    margin-bottom: 48px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: clamp(24px, 5vw, 72px);
+  }
+
+  .side {
+    position: sticky;
+    top: 120px;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .side-block {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .side ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .side ol a {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--fg-2);
+    text-decoration: none;
+  }
+
+  .side ol a:hover {
+    color: var(--fg);
+  }
+
+  @media (max-width: 900px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+    .side {
+      position: static;
+    }
+  }
+</style>

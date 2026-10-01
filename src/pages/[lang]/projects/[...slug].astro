@@ -1,0 +1,195 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '@/layouts/Base.astro';
+import GardenRow from '@/components/GardenRow.astro';
+import type { Lang } from '@/i18n/ui';
+import { getLocalized, langOf, path, slugOf, useTranslations } from '@/i18n/utils';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('projects', (e) => import.meta.env.DEV || !e.data.draft);
+  return entries.map((entry) => ({
+    params: { lang: langOf(entry), slug: slugOf(entry) },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+const { Content } = await render(entry);
+const d = entry.data;
+const slug = slugOf(entry);
+
+const related = (await getLocalized('garden', lang))
+  .filter((g) => g.data.project === slug)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const statusLabel: Record<typeof d.status, string> =
+  lang === 'es'
+    ? { production: 'En producción', 'in-progress': 'En progreso', archived: 'Archivado', concept: 'Concepto' }
+    : { production: 'In production', 'in-progress': 'In progress', archived: 'Archived', concept: 'Concept' };
+---
+
+<Base title={d.title} description={d.summary} type="article">
+  <article>
+    <header class="page-head wrap head">
+      <a class="arrow-link back" href={path(lang, 'projects')}>← {t('projects.back')}</a>
+      <h1>{d.title}</h1>
+      <p class="lede">{d.summary}</p>
+
+      <dl class="facts">
+        <div><dt class="label">{t('projects.role')}</dt><dd>{d.role}</dd></div>
+        <div><dt class="label">{t('projects.year')}</dt><dd>{d.year}</dd></div>
+        <div><dt class="label">{t('projects.status')}</dt><dd>{statusLabel[d.status]}</dd></div>
+        <div class="wide-cell">
+          <dt class="label">{t('projects.stack')}</dt>
+          <dd><ul class="tags">{d.stack.map((s) => <li class="tag">{s}</li>)}</ul></dd>
+        </div>
+      </dl>
+
+      {
+        d.outcomes.length > 0 && (
+          <ul class="outcomes" aria-label={t('projects.outcomes')}>
+            {d.outcomes.map((o) => (
+              <li>
+                <span class="v wide">{o.value}</span>
+                <span class="label">{o.label}</span>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+
+      <div class="links">
+        {d.private && <span class="tag notice">● {t('projects.private')}</span>}
+        {!d.private && d.repo && <a class="btn" href={d.repo} rel="noopener">{t('projects.repo')} →</a>}
+        {!d.private && d.live && <a class="btn btn--accent" href={d.live} rel="noopener">{t('projects.live')} →</a>}
+      </div>
+    </header>
+
+    <div class="wrap body">
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+
+    {
+      related.length > 0 && (
+        <section class="section wrap">
+          <h2 class="rel-title">{t('projects.related')}</h2>
+          <ul class="rel">{related.map((g) => <GardenRow entry={g} lang={lang} />)}</ul>
+        </section>
+      )
+    }
+  </article>
+</Base>
+
+<style>
+  .head h1 {
+    font-size: clamp(2.4rem, 7.5vw, 5.5rem);
+  }
+
+  .back {
+    display: inline-block;
+    margin-bottom: 28px;
+  }
+
+  .back::after {
+    content: '' !important;
+  }
+
+  .facts {
+    margin: 40px 0 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 2fr);
+    border-top: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .facts div {
+    padding: 14px 16px 14px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .facts div + div {
+    padding-left: 16px;
+    border-left: 1px solid var(--line);
+  }
+
+  .facts dd {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+
+  .outcomes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    border-bottom: 1px solid var(--line);
+  }
+
+  .outcomes li {
+    padding: 20px 16px 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .v {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    color: var(--accent);
+    line-height: 1;
+    text-transform: none;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .notice {
+    color: var(--fg-2);
+    padding: 0.6em 0.9em;
+  }
+
+  .body {
+    padding-bottom: clamp(56px, 9vw, 112px);
+  }
+
+  .rel-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .rel {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line-strong);
+  }
+
+  @media (max-width: 760px) {
+    .facts {
+      grid-template-columns: 1fr 1fr;
+    }
+    .facts div + div {
+      padding-left: 0;
+      border-left: 0;
+    }
+    .facts div {
+      border-bottom: 1px solid var(--line);
+    }
+    .wide-cell {
+      grid-column: span 2;
+    }
+  }
+</style>

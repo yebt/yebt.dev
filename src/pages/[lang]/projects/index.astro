@@ -1,0 +1,34 @@
+---
+import Base from '@/layouts/Base.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import type { Lang } from '@/i18n/ui';
+import { getLocalized, getStaticLangPaths, useTranslations } from '@/i18n/utils';
+
+export const getStaticPaths = getStaticLangPaths;
+
+const lang = Astro.params.lang as Lang;
+const t = useTranslations(lang);
+const projects = (await getLocalized('projects', lang)).sort(
+  (a, b) => Number(b.data.featured) - Number(a.data.featured) || a.data.order - b.data.order || b.data.year - a.data.year,
+);
+---
+
+<Base title={t('projects.title')} description={t('projects.lede')}>
+  <header class="page-head wrap">
+    <span class="label accent">01 — {projects.length.toString().padStart(2, '0')} {lang === 'es' ? 'casos' : 'cases'}</span>
+    <h1>{t('projects.title')}</h1>
+    <p class="lede">{t('projects.lede')}</p>
+  </header>
+  <section class="wrap grid">
+    {projects.map((p, i) => <ProjectCard project={p} lang={lang} index={i} />)}
+  </section>
+</Base>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+    gap: 16px;
+    padding-bottom: clamp(56px, 9vw, 112px);
+  }
+</style>
